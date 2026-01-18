@@ -22,15 +22,11 @@ class SearchViewModel: ObservableObject {
     // Search filters
     @Published var keywordsText: String = ""
     @Published var locationText: String = ""
-    @Published var techStackText: String = ""
     @Published var remoteOnly: Bool = false
     @Published var offersRelocation: Bool = false
     @Published var requiresVisaSponsorship: Bool = false
     @Published var postedWithinDays: Int? = nil
-    @Published var includeStartups: Bool = true
-    @Published var includeMidsize: Bool = true
-    @Published var includeEnterprise: Bool = true
-    @Published var minimumMatchScore: Double = 0.5
+    @Published var minimumMatchScore: Double = 0.75
 
     // Search state
     @Published var isSearching: Bool = false
@@ -50,21 +46,6 @@ class SearchViewModel: ObservableObject {
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-    }
-
-    var techStack: [String] {
-        techStackText
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
-    }
-
-    var companyTypes: [String] {
-        var types: [String] = []
-        if includeStartups { types.append("Startup") }
-        if includeMidsize { types.append("Mid-size") }
-        if includeEnterprise { types.append("Enterprise") }
-        return types
     }
 
     // MARK: - Initialization
@@ -118,9 +99,7 @@ class SearchViewModel: ObservableObject {
             postedWithinDays: postedWithinDays,
             requiresRelocation: offersRelocation,
             remoteOnly: remoteOnly,
-            techStackFilter: techStack,
             visaSponsorshipRequired: requiresVisaSponsorship,
-            companyTypeFilter: companyTypes,
             minimumMatchScore: minimumMatchScore
         )
 
@@ -160,15 +139,11 @@ class SearchViewModel: ObservableObject {
     func resetFilters() {
         keywordsText = ""
         locationText = ""
-        techStackText = ""
         remoteOnly = false
         offersRelocation = false
         requiresVisaSponsorship = false
         postedWithinDays = nil
-        includeStartups = true
-        includeMidsize = true
-        includeEnterprise = true
-        minimumMatchScore = 0.5
+        minimumMatchScore = 0.75
     }
 }
 
@@ -179,9 +154,7 @@ struct SearchFilters {
     var postedWithinDays: Int?
     var requiresRelocation: Bool?
     var remoteOnly: Bool?
-    var techStackFilter: [String]
     var visaSponsorshipRequired: Bool?
-    var companyTypeFilter: [String]
     var minimumMatchScore: Double
 }
 

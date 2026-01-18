@@ -40,9 +40,9 @@ class JobSearchService {
             location: filters.location,
             remoteOnly: filters.remoteOnly,
             postedWithinDays: filters.postedWithinDays,
-            techStack: filters.techStackFilter,
+            techStack: [],
             visaSponsorship: filters.visaSponsorshipRequired,
-            companyTypes: filters.companyTypeFilter,
+            companyTypes: [],
             scrapingLevel: scrapingLevel.rawValue,
             maxResults: maxResults
         )
@@ -100,9 +100,7 @@ class JobSearchService {
             postedWithinDays: filters.postedWithinDays,
             requiresRelocation: filters.requiresRelocation,
             remoteOnly: filters.remoteOnly,
-            techStackFilter: filters.techStackFilter,
             visaSponsorshipRequired: filters.visaSponsorshipRequired,
-            companyTypeFilter: filters.companyTypeFilter,
             minimumMatchScore: filters.minimumMatchScore
         )
 

@@ -19,10 +19,8 @@ final class SearchQuery {
     var executedDate: Date
 
     // Developer-specific filters
-    var techStackFilter: [String] = []
     var visaSponsorshipRequired: Bool?
-    var companyTypeFilter: [String] = [] // Startup, Enterprise, etc.
-    var minimumMatchScore: Double = 0.5
+    var minimumMatchScore: Double = 0.75
 
     // Relationships
     @Relationship var resume: ResumeProfile?
@@ -34,10 +32,8 @@ final class SearchQuery {
         postedWithinDays: Int? = nil,
         requiresRelocation: Bool? = nil,
         remoteOnly: Bool? = nil,
-        techStackFilter: [String] = [],
         visaSponsorshipRequired: Bool? = nil,
-        companyTypeFilter: [String] = [],
-        minimumMatchScore: Double = 0.5
+        minimumMatchScore: Double = 0.75
     ) {
         self.id = UUID()
         self.keywords = keywords
@@ -46,9 +42,7 @@ final class SearchQuery {
         self.requiresRelocation = requiresRelocation
         self.remoteOnly = remoteOnly
         self.executedDate = Date()
-        self.techStackFilter = techStackFilter
         self.visaSponsorshipRequired = visaSponsorshipRequired
-        self.companyTypeFilter = companyTypeFilter
         self.minimumMatchScore = minimumMatchScore
     }
 }
@@ -87,10 +81,6 @@ extension SearchQuery {
 
         if let days = postedWithinDays {
             parts.append("Posted within \(days) days")
-        }
-
-        if !techStackFilter.isEmpty {
-            parts.append("Tech: \(techStackFilter.joined(separator: ", "))")
         }
 
         return parts.isEmpty ? "No filters" : parts.joined(separator: " | ")

@@ -32,16 +32,6 @@ struct SearchFiltersView: View {
                         .textFieldStyle(.roundedBorder)
                 }
 
-                // Tech Stack (Developer-specific)
-                Section("Tech Stack") {
-                    TextField("e.g., Python, React, AWS", text: $viewModel.techStackText)
-                        .textFieldStyle(.roundedBorder)
-
-                    Text("Filter by required technologies")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
                 // Remote & Relocation
                 Section("Work Arrangement") {
                     Toggle("Remote Only", isOn: $viewModel.remoteOnly)
@@ -61,13 +51,6 @@ struct SearchFiltersView: View {
                         Text("Month").tag(30 as Int?)
                     }
                     .pickerStyle(.menu)
-                }
-
-                // Company Type
-                Section("Company Type") {
-                    Toggle("Startups", isOn: $viewModel.includeStartups)
-                    Toggle("Mid-size", isOn: $viewModel.includeMidsize)
-                    Toggle("Enterprise", isOn: $viewModel.includeEnterprise)
                 }
 
                 // Match Score
