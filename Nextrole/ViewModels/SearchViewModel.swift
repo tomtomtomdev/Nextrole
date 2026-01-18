@@ -56,14 +56,31 @@ class SearchViewModel: ObservableObject {
 
     // MARK: - Resume Management
     func uploadResume(from url: URL) async {
-        guard let service = resumeService else { return }
+        guard let service = resumeService else {
+            errorMessage = "Service not initialized. Please restart the app."
+            return
+        }
 
         do {
             errorMessage = nil
             let resume = try await service.importResume(from: url)
             self.currentResume = resume
-        } catch {
-            errorMessage = "Failed to parse resume: \(error.localizedDescription)"
+        } catch let error as NSError {
+            // Provide user-friendly error messages
+            if error.domain == NSCocoaErrorDomain {
+                switch error.code {
+                case NSFileReadNoPermissionError:
+                    errorMessage = "Permission denied. Please select the file again and grant access."
+                case NSFileNoSuchFileError:
+                    errorMessage = "File not found. Please select a valid PDF file."
+                case NSFileReadCorruptFileError:
+                    errorMessage = "The PDF file is corrupted or invalid."
+                default:
+                    errorMessage = "Failed to read file: \(error.localizedDescription)"
+                }
+            } else {
+                errorMessage = "Failed to parse resume: \(error.localizedDescription)"
+            }
         }
     }
 

@@ -118,7 +118,7 @@ class PythonBridge {
         filters: FiltersInput,
         progressHandler: @escaping (String, Double) -> Void
     ) async throws -> ScraperOutput {
-        let scriptPath = "\(scriptsPath)/scrapers/__init__.py"
+        let scriptPath = "\(scriptsPath)/job_search.py"
 
         let input = ScraperInput(
             action: "search",

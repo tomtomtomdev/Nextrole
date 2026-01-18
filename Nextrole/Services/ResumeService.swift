@@ -19,6 +19,14 @@ class ResumeService {
 
     // MARK: - Import Resume
     func importResume(from url: URL) async throws -> ResumeProfile {
+        // Request access to security-scoped resource
+        let accessGranted = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessGranted {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
         // 1. Copy PDF to app's document directory
         let documentsURL = try FileManager.default.url(
             for: .documentDirectory,

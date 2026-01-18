@@ -12,18 +12,44 @@ struct ResumeUploadView: View {
     @EnvironmentObject var viewModel: SearchViewModel
     @State private var isFileImporterPresented = false
     @State private var isDragging = false
+    @State private var isProcessing = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Resume")
                 .font(.headline)
 
-            if let resume = viewModel.currentResume {
+            if isProcessing {
+                // Loading state
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Processing resume...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+            } else if let resume = viewModel.currentResume {
                 // Resume loaded state
                 resumeLoadedView(resume: resume)
             } else {
                 // Empty state - drag and drop or select
                 resumeEmptyView
+            }
+
+            // Error message
+            if let error = viewModel.errorMessage, !error.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+                .padding(8)
+                .background(Color.red.opacity(0.1))
+                .cornerRadius(6)
             }
         }
         .fileImporter(

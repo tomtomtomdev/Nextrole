@@ -48,19 +48,27 @@ A native macOS application that analyzes your resume and automatically searches 
 
 2. **Install Python dependencies**
    ```bash
-   cd Nextrole/Python
-   python3 -m pip install -r requirements.txt
+   ./setup_python.sh
    ```
 
+   This will install required packages to your system Python:
+   - pypdf (PDF parsing)
+   - beautifulsoup4 (HTML parsing)
+   - requests (HTTP client)
+   - fake-useragent (User agent rotation)
+   - python-dateutil (Date parsing)
+   - fuzzywuzzy (Fuzzy string matching)
+
 3. **Open in Xcode**
-   - You'll need to create an Xcode project for the macOS app
-   - Set the deployment target to macOS 14.0+
-   - Add all Swift files from the `Nextrole/` directory
-   - Configure the project to bundle Python scripts
+   ```bash
+   open Nextrole.xcodeproj
+   ```
 
 4. **Build and Run**
    - Build the project in Xcode (Cmd+B)
    - Run the app (Cmd+R)
+
+   **Note**: The app runs without App Sandbox in development mode to allow Python script execution and network access.
 
 ## Usage
 
