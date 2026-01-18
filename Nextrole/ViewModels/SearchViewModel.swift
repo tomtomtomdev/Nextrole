@@ -1,0 +1,192 @@
+//
+//  SearchViewModel.swift
+//  Nextrole
+//
+//  Created by Claude Code on 2026-01-18.
+//
+
+import Foundation
+import SwiftUI
+import SwiftData
+import Combine
+
+@MainActor
+class SearchViewModel: ObservableObject {
+    // Services
+    private var resumeService: ResumeService?
+    private var searchService: JobSearchService?
+
+    // Resume state
+    @Published var currentResume: ResumeProfile?
+
+    // Search filters
+    @Published var keywordsText: String = ""
+    @Published var locationText: String = ""
+    @Published var techStackText: String = ""
+    @Published var remoteOnly: Bool = false
+    @Published var offersRelocation: Bool = false
+    @Published var requiresVisaSponsorship: Bool = false
+    @Published var postedWithinDays: Int? = nil
+    @Published var includeStartups: Bool = true
+    @Published var includeMidsize: Bool = true
+    @Published var includeEnterprise: Bool = true
+    @Published var minimumMatchScore: Double = 0.5
+
+    // Search state
+    @Published var isSearching: Bool = false
+    @Published var searchProgressValue: Double = 0.0
+    @Published var searchProgressMessage: String = ""
+    @Published var jobPostings: [JobPosting] = []
+    @Published var selectedJobID: UUID?
+    @Published var errorMessage: String?
+
+    // Computed properties
+    var canSearch: Bool {
+        currentResume != nil && !isSearching
+    }
+
+    var keywords: [String] {
+        keywordsText
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    var techStack: [String] {
+        techStackText
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    var companyTypes: [String] {
+        var types: [String] = []
+        if includeStartups { types.append("Startup") }
+        if includeMidsize { types.append("Mid-size") }
+        if includeEnterprise { types.append("Enterprise") }
+        return types
+    }
+
+    // MARK: - Initialization
+    func configure(with context: ModelContext) {
+        self.resumeService = ResumeService(modelContext: context)
+        self.searchService = JobSearchService(modelContext: context)
+    }
+
+    // MARK: - Resume Management
+    func uploadResume(from url: URL) async {
+        guard let service = resumeService else { return }
+
+        do {
+            errorMessage = nil
+            let resume = try await service.importResume(from: url)
+            self.currentResume = resume
+        } catch {
+            errorMessage = "Failed to parse resume: \(error.localizedDescription)"
+        }
+    }
+
+    func removeResume() {
+        guard let resume = currentResume, let service = resumeService else { return }
+
+        do {
+            try service.deleteResume(resume)
+            currentResume = nil
+            jobPostings = []
+            errorMessage = nil
+        } catch {
+            errorMessage = "Failed to delete resume: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - Search Management
+    func executeSearch() async {
+        guard let resume = currentResume, let service = searchService else {
+            errorMessage = "Please upload a resume first"
+            return
+        }
+
+        isSearching = true
+        errorMessage = nil
+        jobPostings = []
+        searchProgressValue = 0.0
+        searchProgressMessage = "Preparing search..."
+
+        let filters = SearchFilters(
+            keywords: keywords,
+            location: locationText.isEmpty ? nil : locationText,
+            postedWithinDays: postedWithinDays,
+            requiresRelocation: offersRelocation,
+            remoteOnly: remoteOnly,
+            techStackFilter: techStack,
+            visaSponsorshipRequired: requiresVisaSponsorship,
+            companyTypeFilter: companyTypes,
+            minimumMatchScore: minimumMatchScore
+        )
+
+        do {
+            // Update progress during search
+            searchProgressMessage = "Analyzing resume..."
+            searchProgressValue = 0.1
+
+            let results = try await service.searchJobs(
+                resume: resume,
+                filters: filters,
+                progressHandler: { progress in
+                    Task { @MainActor in
+                        self.searchProgressValue = progress.value
+                        self.searchProgressMessage = progress.message
+                    }
+                }
+            )
+
+            jobPostings = results
+            searchProgressMessage = "Complete!"
+            searchProgressValue = 1.0
+
+        } catch {
+            errorMessage = "Search failed: \(error.localizedDescription)"
+        }
+
+        isSearching = false
+    }
+
+    func cancelSearch() {
+        searchService?.cancelSearch()
+        isSearching = false
+        searchProgressMessage = "Cancelled"
+    }
+
+    func resetFilters() {
+        keywordsText = ""
+        locationText = ""
+        techStackText = ""
+        remoteOnly = false
+        offersRelocation = false
+        requiresVisaSponsorship = false
+        postedWithinDays = nil
+        includeStartups = true
+        includeMidsize = true
+        includeEnterprise = true
+        minimumMatchScore = 0.5
+    }
+}
+
+// MARK: - Search Filters
+struct SearchFilters {
+    var keywords: [String]
+    var location: String?
+    var postedWithinDays: Int?
+    var requiresRelocation: Bool?
+    var remoteOnly: Bool?
+    var techStackFilter: [String]
+    var visaSponsorshipRequired: Bool?
+    var companyTypeFilter: [String]
+    var minimumMatchScore: Double
+}
+
+// MARK: - Search Progress
+struct SearchProgress {
+    var value: Double
+    var message: String
+}
