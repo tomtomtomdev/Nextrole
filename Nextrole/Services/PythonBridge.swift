@@ -273,8 +273,11 @@ class PythonBridge {
 
     private func parseProgressLine(_ line: String, handler: @escaping (String, Double) -> Void) {
         // Parse lines like "PROGRESS: Searching LinkedIn | 0.25"
-        if line.hasPrefix("PROGRESS:") {
-            let components = line.dropFirst(9).split(separator: "|")
+        let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedLine.isEmpty else { return }
+
+        if trimmedLine.hasPrefix("PROGRESS:") {
+            let components = trimmedLine.dropFirst(9).split(separator: "|")
             if components.count == 2 {
                 let message = components[0].trimmingCharacters(in: .whitespaces)
                 if let value = Double(components[1].trimmingCharacters(in: .whitespaces)) {
@@ -282,6 +285,11 @@ class PythonBridge {
                         handler(message, value)
                     }
                 }
+            }
+        } else {
+            // Send all other stderr output as log messages with progress 0.0
+            DispatchQueue.main.async {
+                handler(trimmedLine, 0.0)
             }
         }
     }

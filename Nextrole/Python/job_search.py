@@ -116,6 +116,8 @@ def run_scraper(
 ) -> list:
     """Run a single scraper and return results"""
     source_name = scraper.get_source_name()
+    sys.stderr.write(f"Starting {source_name} scraper...\n")
+    sys.stderr.flush()
     log_progress(f"Searching {source_name}...", 0.0)
 
     jobs = scraper.search(
@@ -125,6 +127,9 @@ def run_scraper(
         posted_within_days=posted_within_days,
         max_results=max_results
     )
+
+    sys.stderr.write(f"{source_name} returned {len(jobs)} jobs\n")
+    sys.stderr.flush()
 
     return jobs
 
@@ -190,24 +195,45 @@ def log_progress(message: str, progress: float):
 def main():
     """Main entry point when called from Swift"""
     try:
+        sys.stderr.write("Python script started\n")
+        sys.stderr.flush()
+
         # Read input from stdin (JSON)
+        sys.stderr.write("Reading input from stdin...\n")
+        sys.stderr.flush()
+
         input_data = json.loads(sys.stdin.read())
+        sys.stderr.write(f"Input received: action={input_data.get('action')}\n")
+        sys.stderr.flush()
 
         action = input_data.get('action')
 
         if action == 'search':
             resume_data = input_data.get('resumeData', {})
             filters = input_data.get('filters', {})
+            sys.stderr.write(f"Resume skills: {len(resume_data.get('skills', []))} skills\n")
+            sys.stderr.write(f"Filters: {filters.get('scrapingLevel', 'normal')} level, max {filters.get('maxResults', 100)} results\n")
+            sys.stderr.flush()
 
             result = search_all_boards(resume_data, filters)
         else:
             result = {"jobs": [], "errors": [f"Unknown action: {action}"]}
 
+        sys.stderr.write("Writing output to stdout...\n")
+        sys.stderr.flush()
+
         # Write output to stdout (JSON)
         print(json.dumps(result))
 
+        sys.stderr.write("Python script completed successfully\n")
+        sys.stderr.flush()
+
     except Exception as e:
         import traceback
+        sys.stderr.write(f"ERROR: {str(e)}\n")
+        sys.stderr.write(traceback.format_exc())
+        sys.stderr.flush()
+
         error_result = {
             "jobs": [],
             "errors": [f"{str(e)}\n{traceback.format_exc()}"]

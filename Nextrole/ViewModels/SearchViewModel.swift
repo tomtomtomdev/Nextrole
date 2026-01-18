@@ -35,6 +35,7 @@ class SearchViewModel: ObservableObject {
     @Published var jobPostings: [JobPosting] = []
     @Published var selectedJobID: UUID?
     @Published var errorMessage: String?
+    @Published var searchLogs: [String] = []
 
     // Computed properties
     var canSearch: Bool {
@@ -109,6 +110,8 @@ class SearchViewModel: ObservableObject {
         jobPostings = []
         searchProgressValue = 0.0
         searchProgressMessage = "Preparing search..."
+        searchLogs = []
+        addLog("Starting job search...")
 
         let filters = SearchFilters(
             keywords: keywords,
@@ -124,6 +127,9 @@ class SearchViewModel: ObservableObject {
             // Update progress during search
             searchProgressMessage = "Analyzing resume..."
             searchProgressValue = 0.1
+            addLog("Analyzing resume with \(resume.skills.count) skills")
+            addLog("Keywords: \(keywords.joined(separator: ", "))")
+            addLog("Location: \(locationText.isEmpty ? "Any" : locationText)")
 
             let results = try await service.searchJobs(
                 resume: resume,
@@ -132,19 +138,24 @@ class SearchViewModel: ObservableObject {
                     Task { @MainActor in
                         self.searchProgressValue = progress.value
                         self.searchProgressMessage = progress.message
+                        self.addLog(progress.message)
                     }
                 }
             )
 
+            addLog("Search completed: \(results.count) jobs found")
             jobPostings = results
             searchProgressMessage = "Complete!"
             searchProgressValue = 1.0
 
         } catch {
-            errorMessage = "Search failed: \(error.localizedDescription)"
+            let errorMsg = "Search failed: \(error.localizedDescription)"
+            errorMessage = errorMsg
+            addLog("ERROR: \(errorMsg)")
         }
 
         isSearching = false
+        addLog("Search finished")
     }
 
     func cancelSearch() {
@@ -161,6 +172,12 @@ class SearchViewModel: ObservableObject {
         requiresVisaSponsorship = false
         postedWithinDays = nil
         minimumMatchScore = 0.75
+    }
+
+    // MARK: - Logging
+    private func addLog(_ message: String) {
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
+        searchLogs.append("[\(timestamp)] \(message)")
     }
 }
 
