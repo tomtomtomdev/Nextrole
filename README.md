@@ -54,10 +54,15 @@ A native macOS application that analyzes your resume and automatically searches 
    This will install required packages to your system Python:
    - pypdf (PDF parsing)
    - beautifulsoup4 (HTML parsing)
+   - lxml (XML/HTML parser)
+   - playwright (Browser automation for LinkedIn)
    - requests (HTTP client)
    - fake-useragent (User agent rotation)
    - python-dateutil (Date parsing)
    - fuzzywuzzy (Fuzzy string matching)
+   - ratelimit, tenacity (Rate limiting)
+
+   The script will also install Playwright browsers (~160MB for Chromium).
 
 3. **Open in Xcode**
    ```bash
@@ -182,14 +187,14 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 
 ## Known Limitations
 
-- **LinkedIn**: Requires authentication and has strict anti-scraping measures (placeholder implementation)
+- **LinkedIn**: Uses Playwright for public job search (no authentication). May encounter rate limits or CAPTCHAs with aggressive scraping. Respects ToS with conservative rate limiting (10-15s between pages).
 - **Workday**: Requires browser automation for JavaScript-heavy sites (placeholder implementation)
 - **Rate Limits**: Aggressive scraping may trigger rate limits or bans
 - **Job Board Changes**: Scrapers may break if job boards change their HTML structure
 
 ## Future Enhancements
 
-- [ ] Full LinkedIn integration with Selenium/Playwright
+- [ ] LinkedIn authenticated access with macOS Keychain for better data access
 - [ ] Workday scraper with browser automation
 - [ ] Hacker News "Who's Hiring" parser
 - [ ] Stack Overflow Jobs integration
@@ -211,7 +216,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [Swift](https://swift.org/) and [SwiftUI](https://developer.apple.com/swiftui/)
 - Resume parsing with [PyPDF](https://pypdf2.readthedocs.io/)
-- Web scraping with [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) and [Selenium](https://www.selenium.dev/)
+- Web scraping with [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/), [Playwright](https://playwright.dev/), and [Selenium](https://www.selenium.dev/)
 - Inspired by the need for better developer job search tools
 
 ## Support
