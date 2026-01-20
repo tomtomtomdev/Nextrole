@@ -309,19 +309,26 @@ struct MatchBreakdownView: View {
 
             Divider()
 
-            // Individual factors
+            // Individual factors (aligned with comprehensive analysis)
             BreakdownRow(
-                label: "Skills",
+                label: "Tech Skills",
                 score: job.skillsScore,
                 weight: 0.40,
                 icon: "hammer"
             )
 
             BreakdownRow(
-                label: "Keywords",
+                label: "Architecture",
                 score: job.keywordsScore,
-                weight: 0.30,
-                icon: "text.magnifyingglass"
+                weight: 0.20,
+                icon: "building.2"
+            )
+
+            BreakdownRow(
+                label: "Collab",
+                score: job.titleScore,
+                weight: 0.15,
+                icon: "person.2"
             )
 
             BreakdownRow(
@@ -338,17 +345,10 @@ struct MatchBreakdownView: View {
                 icon: "location"
             )
 
-            BreakdownRow(
-                label: "Title",
-                score: job.titleScore,
-                weight: 0.05,
-                icon: "textformat"
-            )
-
             Divider()
 
             // Legend
-            Text("Score = weighted average of all factors")
+            Text("Based on skills, architecture, collaboration, experience & location")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

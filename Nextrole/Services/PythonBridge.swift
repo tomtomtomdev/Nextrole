@@ -77,6 +77,8 @@ class PythonBridge {
         let skills: [String]
         let keywords: [String]
         let location: String?
+        let text: String?
+        let yearsExperience: Int?
     }
 
     struct FiltersInput: Codable {

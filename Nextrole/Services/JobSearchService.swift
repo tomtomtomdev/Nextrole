@@ -32,7 +32,9 @@ class JobSearchService {
         let resumeData = PythonBridge.ResumeDataInput(
             skills: resume.skills,
             keywords: resume.keywords,
-            location: resume.location
+            location: resume.location,
+            text: resume.parsedText,
+            yearsExperience: resume.yearsOfExperience
         )
 
         // Load user preferences for scraping settings
