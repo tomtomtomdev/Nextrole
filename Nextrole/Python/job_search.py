@@ -16,6 +16,7 @@ from scrapers.linkedin_scraper import LinkedInScraper
 from scrapers.indeed_scraper import IndeedScraper
 from scrapers.greenhouse_scraper import GreenhouseScraper
 from scrapers.workday_scraper import WorkdayScraper
+from scrapers.japandev_scraper import JapanDevScraper
 from scrapers.matcher import calculate_match_score
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -38,6 +39,7 @@ def search_all_boards(resume_data: Dict, filters: Dict) -> Dict:
         IndeedScraper(filters.get('scrapingLevel', 'normal')),
         GreenhouseScraper(filters.get('scrapingLevel', 'normal')),
         WorkdayScraper(filters.get('scrapingLevel', 'normal')),
+        JapanDevScraper(filters.get('scrapingLevel', 'normal')),
     ]
 
     all_jobs = []
