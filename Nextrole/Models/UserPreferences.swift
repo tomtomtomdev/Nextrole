@@ -30,6 +30,7 @@ final class UserPreferences {
     var lastUsedResumeID: UUID?
     var lastUsedKeywords: String = ""
     var lastUsedLocation: String = ""
+    var lastSearchQueryID: UUID?
 
     init(
         defaultLocation: String? = nil,
@@ -44,7 +45,8 @@ final class UserPreferences {
         showSalaryEstimates: Bool = true,
         lastUsedResumeID: UUID? = nil,
         lastUsedKeywords: String = "",
-        lastUsedLocation: String = ""
+        lastUsedLocation: String = "",
+        lastSearchQueryID: UUID? = nil
     ) {
         self.id = UUID()
         self.defaultLocation = defaultLocation
@@ -60,6 +62,7 @@ final class UserPreferences {
         self.lastUsedResumeID = lastUsedResumeID
         self.lastUsedKeywords = lastUsedKeywords
         self.lastUsedLocation = lastUsedLocation
+        self.lastSearchQueryID = lastSearchQueryID
     }
 }
 

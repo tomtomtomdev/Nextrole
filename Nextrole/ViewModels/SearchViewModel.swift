@@ -144,7 +144,7 @@ class SearchViewModel: ObservableObject {
             addLog("Keywords: \(keywords.joined(separator: ", "))")
             addLog("Location: \(locationText.isEmpty ? "Any" : locationText)")
 
-            let results = try await service.searchJobs(
+            let result = try await service.searchJobs(
                 resume: resume,
                 filters: filters,
                 progressHandler: { progress in
@@ -156,8 +156,9 @@ class SearchViewModel: ObservableObject {
                 }
             )
 
-            addLog("Search completed: \(results.count) jobs found")
-            jobPostings = results
+            addLog("Search completed: \(result.jobs.count) jobs found")
+            jobPostings = result.jobs
+            saveLastSearchQueryID(result.queryID)
             searchProgressMessage = "Complete!"
             searchProgressValue = 1.0
 
@@ -228,6 +229,9 @@ class SearchViewModel: ObservableObject {
                 addLog("Restored last used resume: \(savedResume.fileName)")
             }
         }
+
+        // Restore cached job postings
+        loadCachedJobPostings()
     }
 
     private func saveResumeState() {
@@ -252,6 +256,27 @@ class SearchViewModel: ObservableObject {
 
         preferences.lastUsedLocation = locationText
         try? context.save()
+    }
+
+    private func saveLastSearchQueryID(_ queryID: UUID) {
+        guard let preferences = getOrCreatePreferences(),
+              let context = modelContext else { return }
+
+        preferences.lastSearchQueryID = queryID
+        try? context.save()
+        addLog("Saved search results to cache")
+    }
+
+    private func loadCachedJobPostings() {
+        guard let preferences = getOrCreatePreferences(),
+              let queryID = preferences.lastSearchQueryID,
+              let service = searchService else { return }
+
+        let cachedJobs = service.fetchJobPostings(forQueryID: queryID)
+        if !cachedJobs.isEmpty {
+            jobPostings = cachedJobs
+            addLog("Restored \(cachedJobs.count) cached job results")
+        }
     }
 }
 

@@ -18,11 +18,16 @@ class JobSearchService {
     }
 
     // MARK: - Search Jobs
+    struct SearchResult {
+        let jobs: [JobPosting]
+        let queryID: UUID
+    }
+
     func searchJobs(
         resume: ResumeProfile,
         filters: SearchFilters,
         progressHandler: @escaping (SearchProgress) -> Void
-    ) async throws -> [JobPosting] {
+    ) async throws -> SearchResult {
         // 1. Prepare input for Python scrapers
         let resumeData = PythonBridge.ResumeDataInput(
             skills: resume.skills,
@@ -119,8 +124,9 @@ class JobSearchService {
 
         progressHandler(SearchProgress(value: 1.0, message: "Complete!"))
 
-        // 5. Return sorted results
-        return jobPostings.sorted { $0.matchScore > $1.matchScore }
+        // 5. Return sorted results with query ID
+        let sortedJobs = jobPostings.sorted { $0.matchScore > $1.matchScore }
+        return SearchResult(jobs: sortedJobs, queryID: searchQuery.id)
     }
 
     // MARK: - Cancel Search
@@ -134,6 +140,16 @@ class JobSearchService {
             sortBy: [SortDescriptor(\.executedDate, order: .reverse)]
         )
         return (try? modelContext.fetch(descriptor)) ?? []
+    }
+
+    // MARK: - Fetch Jobs by Search Query ID
+    func fetchJobPostings(forQueryID queryID: UUID) -> [JobPosting] {
+        let descriptor = FetchDescriptor<SearchQuery>()
+        guard let queries = try? modelContext.fetch(descriptor),
+              let query = queries.first(where: { $0.id == queryID }) else {
+            return []
+        }
+        return query.jobPostings.sorted { $0.matchScore > $1.matchScore }
     }
 
     // MARK: - Delete Search
