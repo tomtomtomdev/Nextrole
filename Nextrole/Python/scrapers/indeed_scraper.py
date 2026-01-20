@@ -32,13 +32,15 @@ class IndeedScraper(BaseScraper):
         try:
             # Build search query
             query = " ".join(keywords) if keywords else "developer"
-            location_query = location if location else "Remote"
 
             # Build URL parameters
             params = {
                 'q': query,
-                'l': location_query,
             }
+
+            # Only add location if provided (empty = search all locations)
+            if location:
+                params['l'] = location
 
             if remote_only:
                 params['sc'] = '0kf:attr(DSQF7)remotejob;'
@@ -47,7 +49,10 @@ class IndeedScraper(BaseScraper):
                 params['fromage'] = str(posted_within_days)
 
             # Construct search URL
-            search_url = f"{self.BASE_URL}/jobs?q={quote_plus(query)}&l={quote_plus(location_query)}"
+            search_url = f"{self.BASE_URL}/jobs?q={quote_plus(query)}"
+
+            if location:
+                search_url += f"&l={quote_plus(location)}"
 
             if remote_only:
                 search_url += "&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11"
