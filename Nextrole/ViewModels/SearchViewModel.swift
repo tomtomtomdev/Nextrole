@@ -15,18 +15,30 @@ class SearchViewModel: ObservableObject {
     // Services
     private var resumeService: ResumeService?
     private var searchService: JobSearchService?
+    private var modelContext: ModelContext?
 
     // Resume state
-    @Published var currentResume: ResumeProfile?
+    @Published var currentResume: ResumeProfile? {
+        didSet {
+            saveResumeState()
+        }
+    }
 
     // Search filters
-    @Published var keywordsText: String = ""
-    @Published var locationText: String = ""
+    @Published var keywordsText: String = "" {
+        didSet {
+            saveKeywordsState()
+        }
+    }
+    @Published var locationText: String = "" {
+        didSet {
+            saveLocationState()
+        }
+    }
     @Published var remoteOnly: Bool = false
     @Published var offersRelocation: Bool = false
     @Published var requiresVisaSponsorship: Bool = false
     @Published var postedWithinDays: Int? = nil
-    @Published var minimumMatchScore: Double = 0.75
 
     // Search state
     @Published var isSearching: Bool = false
@@ -51,8 +63,10 @@ class SearchViewModel: ObservableObject {
 
     // MARK: - Initialization
     func configure(with context: ModelContext) {
+        self.modelContext = context
         self.resumeService = ResumeService(modelContext: context)
         self.searchService = JobSearchService(modelContext: context)
+        loadSavedState()
     }
 
     // MARK: - Resume Management
@@ -119,8 +133,7 @@ class SearchViewModel: ObservableObject {
             postedWithinDays: postedWithinDays,
             requiresRelocation: offersRelocation,
             remoteOnly: remoteOnly,
-            visaSponsorshipRequired: requiresVisaSponsorship,
-            minimumMatchScore: minimumMatchScore
+            visaSponsorshipRequired: requiresVisaSponsorship
         )
 
         do {
@@ -171,13 +184,74 @@ class SearchViewModel: ObservableObject {
         offersRelocation = false
         requiresVisaSponsorship = false
         postedWithinDays = nil
-        minimumMatchScore = 0.75
     }
 
     // MARK: - Logging
     private func addLog(_ message: String) {
         let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
         searchLogs.append("[\(timestamp)] \(message)")
+    }
+
+    // MARK: - State Persistence
+    private func getOrCreatePreferences() -> UserPreferences? {
+        guard let context = modelContext else { return nil }
+
+        let descriptor = FetchDescriptor<UserPreferences>()
+        if let existing = try? context.fetch(descriptor).first {
+            return existing
+        }
+
+        // Create new preferences if none exist
+        let newPreferences = UserPreferences()
+        context.insert(newPreferences)
+        try? context.save()
+        return newPreferences
+    }
+
+    private func loadSavedState() {
+        guard let preferences = getOrCreatePreferences(),
+              let service = resumeService else { return }
+
+        // Restore keywords and location
+        if !preferences.lastUsedKeywords.isEmpty {
+            keywordsText = preferences.lastUsedKeywords
+        }
+        if !preferences.lastUsedLocation.isEmpty {
+            locationText = preferences.lastUsedLocation
+        }
+
+        // Restore last used resume
+        if let resumeID = preferences.lastUsedResumeID {
+            let allResumes = service.fetchAllResumes()
+            if let savedResume = allResumes.first(where: { $0.id == resumeID }) {
+                currentResume = savedResume
+                addLog("Restored last used resume: \(savedResume.fileName)")
+            }
+        }
+    }
+
+    private func saveResumeState() {
+        guard let preferences = getOrCreatePreferences(),
+              let context = modelContext else { return }
+
+        preferences.lastUsedResumeID = currentResume?.id
+        try? context.save()
+    }
+
+    private func saveKeywordsState() {
+        guard let preferences = getOrCreatePreferences(),
+              let context = modelContext else { return }
+
+        preferences.lastUsedKeywords = keywordsText
+        try? context.save()
+    }
+
+    private func saveLocationState() {
+        guard let preferences = getOrCreatePreferences(),
+              let context = modelContext else { return }
+
+        preferences.lastUsedLocation = locationText
+        try? context.save()
     }
 }
 
@@ -189,7 +263,6 @@ struct SearchFilters {
     var requiresRelocation: Bool?
     var remoteOnly: Bool?
     var visaSponsorshipRequired: Bool?
-    var minimumMatchScore: Double
 }
 
 // MARK: - Search Progress

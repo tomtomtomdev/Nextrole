@@ -159,10 +159,6 @@ def apply_filters(jobs: list, filters: Dict, resume_data: Dict) -> list:
     """Apply user filters to job results"""
     filtered = jobs
 
-    # Filter by minimum match score
-    min_score = filters.get('minimumMatchScore', 0.5)
-    filtered = [j for j in filtered if j.get('matchScore', 0.0) >= min_score]
-
     # Filter by tech stack
     tech_filter = filters.get('techStack', [])
     if tech_filter:

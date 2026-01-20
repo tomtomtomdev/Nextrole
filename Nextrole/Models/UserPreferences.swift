@@ -26,6 +26,11 @@ final class UserPreferences {
     var preferredCompanyTypes: [String] = []
     var showSalaryEstimates: Bool
 
+    // Last used search state
+    var lastUsedResumeID: UUID?
+    var lastUsedKeywords: String = ""
+    var lastUsedLocation: String = ""
+
     init(
         defaultLocation: String? = nil,
         defaultRemotePreference: Bool = true,
@@ -36,7 +41,10 @@ final class UserPreferences {
         maxResultsPerBoard: Int = 100,
         defaultTechStack: [String] = [],
         preferredCompanyTypes: [String] = [],
-        showSalaryEstimates: Bool = true
+        showSalaryEstimates: Bool = true,
+        lastUsedResumeID: UUID? = nil,
+        lastUsedKeywords: String = "",
+        lastUsedLocation: String = ""
     ) {
         self.id = UUID()
         self.defaultLocation = defaultLocation
@@ -49,6 +57,9 @@ final class UserPreferences {
         self.defaultTechStack = defaultTechStack
         self.preferredCompanyTypes = preferredCompanyTypes
         self.showSalaryEstimates = showSalaryEstimates
+        self.lastUsedResumeID = lastUsedResumeID
+        self.lastUsedKeywords = lastUsedKeywords
+        self.lastUsedLocation = lastUsedLocation
     }
 }
 

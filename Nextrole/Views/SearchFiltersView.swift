@@ -52,16 +52,6 @@ struct SearchFiltersView: View {
                     }
                     .pickerStyle(.menu)
                 }
-
-                // Match Score
-                Section("Match Score") {
-                    HStack {
-                        Text("Minimum: \(Int(viewModel.minimumMatchScore * 100))%")
-                        Spacer()
-                        Slider(value: $viewModel.minimumMatchScore, in: 0.0...1.0, step: 0.05)
-                            .frame(maxWidth: 150)
-                    }
-                }
             }
             .formStyle(.grouped)
 

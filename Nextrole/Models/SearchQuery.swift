@@ -20,7 +20,6 @@ final class SearchQuery {
 
     // Developer-specific filters
     var visaSponsorshipRequired: Bool?
-    var minimumMatchScore: Double = 0.75
 
     // Relationships
     @Relationship var resume: ResumeProfile?
@@ -32,8 +31,7 @@ final class SearchQuery {
         postedWithinDays: Int? = nil,
         requiresRelocation: Bool? = nil,
         remoteOnly: Bool? = nil,
-        visaSponsorshipRequired: Bool? = nil,
-        minimumMatchScore: Double = 0.75
+        visaSponsorshipRequired: Bool? = nil
     ) {
         self.id = UUID()
         self.keywords = keywords
@@ -43,7 +41,6 @@ final class SearchQuery {
         self.remoteOnly = remoteOnly
         self.executedDate = Date()
         self.visaSponsorshipRequired = visaSponsorshipRequired
-        self.minimumMatchScore = minimumMatchScore
     }
 }
 

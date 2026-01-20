@@ -68,11 +68,6 @@ class JobSearchService {
             let dateFormatter = ISO8601DateFormatter()
             let postedDate = dateFormatter.date(from: jobResult.postedDate) ?? Date()
 
-            // Filter by minimum match score
-            guard jobResult.matchScore >= filters.minimumMatchScore else {
-                continue
-            }
-
             let posting = JobPosting(
                 title: jobResult.title,
                 company: jobResult.company,
@@ -100,8 +95,7 @@ class JobSearchService {
             postedWithinDays: filters.postedWithinDays,
             requiresRelocation: filters.requiresRelocation,
             remoteOnly: filters.remoteOnly,
-            visaSponsorshipRequired: filters.visaSponsorshipRequired,
-            minimumMatchScore: filters.minimumMatchScore
+            visaSponsorshipRequired: filters.visaSponsorshipRequired
         )
 
         searchQuery.resume = resume
