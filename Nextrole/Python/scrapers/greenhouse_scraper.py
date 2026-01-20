@@ -98,7 +98,10 @@ class GreenhouseScraper(BaseScraper):
                 if location and location.lower() not in job_location.lower() and 'remote' not in job_location.lower():
                     continue
 
-                # Parse job
+                # Parse job - use updated_at if available, fallback to current time
+                from datetime import datetime
+                posted_date = job_data.get('updated_at') or datetime.now().isoformat()
+
                 job = {
                     "title": job_data.get('title', ''),
                     "company": company.title(),
@@ -106,7 +109,7 @@ class GreenhouseScraper(BaseScraper):
                     "description": job_data.get('content', ''),
                     "url": job_data.get('absolute_url', ''),
                     "source": self.get_source_name(),
-                    "postedDate": job_data.get('updated_at', ''),
+                    "postedDate": posted_date,
                     "isRemote": 'remote' in job_location.lower(),
                     "offersRelocation": False,
                     "matchScore": 0.0,

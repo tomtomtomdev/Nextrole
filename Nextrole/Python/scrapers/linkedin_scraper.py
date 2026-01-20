@@ -463,6 +463,11 @@ class LinkedInScraper(BaseScraper):
                     date_text = date_text_elem.get_text(strip=True)
                     posted_date = self.parse_relative_date(date_text)
 
+            # Fallback to current date if no date found
+            if not posted_date:
+                from datetime import datetime
+                posted_date = datetime.now().isoformat()
+
             # Description snippet
             desc_elem = (
                 card.select_one('.base-search-card__snippet') or
