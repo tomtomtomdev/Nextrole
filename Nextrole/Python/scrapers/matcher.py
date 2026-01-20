@@ -196,6 +196,17 @@ def calculate_match_score(resume_data: Dict, job: Dict) -> float:
     Returns:
         Score between 0.0 and 1.0
     """
+    breakdown = calculate_match_breakdown(resume_data, job)
+    return breakdown['totalScore']
+
+
+def calculate_match_breakdown(resume_data: Dict, job: Dict) -> Dict:
+    """
+    Calculate match score with detailed breakdown for each factor.
+
+    Returns:
+        Dictionary with totalScore and breakdown of each factor
+    """
     # Extract data
     resume_skills = resume_data.get('skills', [])
     resume_keywords = resume_data.get('keywords', [])
@@ -214,20 +225,46 @@ def calculate_match_score(resume_data: Dict, job: Dict) -> float:
 
     # Title match (simple keyword match)
     title_score = 0.5  # Default
+    matched_title_keyword = None
     if resume_keywords:
         for keyword in resume_keywords:
             if keyword.lower() in job_title:
                 title_score = 1.0
+                matched_title_keyword = keyword
                 break
+
+    # Weights
+    weights = {
+        'skills': 0.40,
+        'keywords': 0.30,
+        'experience': 0.15,
+        'location': 0.10,
+        'title': 0.05
+    }
 
     # Weighted average
     total_score = (
-        skills_score * 0.40 +
-        keywords_score * 0.30 +
-        experience_score * 0.15 +
-        location_score * 0.10 +
-        title_score * 0.05
+        skills_score * weights['skills'] +
+        keywords_score * weights['keywords'] +
+        experience_score * weights['experience'] +
+        location_score * weights['location'] +
+        title_score * weights['title']
     )
 
     # Ensure score is between 0 and 1
-    return max(0.0, min(1.0, total_score))
+    total_score = max(0.0, min(1.0, total_score))
+
+    # Build breakdown
+    return {
+        'totalScore': total_score,
+        'skillsScore': skills_score,
+        'skillsWeight': weights['skills'],
+        'keywordsScore': keywords_score,
+        'keywordsWeight': weights['keywords'],
+        'experienceScore': experience_score,
+        'experienceWeight': weights['experience'],
+        'locationScore': location_score,
+        'locationWeight': weights['location'],
+        'titleScore': title_score,
+        'titleWeight': weights['title'],
+    }

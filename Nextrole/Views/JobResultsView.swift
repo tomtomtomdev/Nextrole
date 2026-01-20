@@ -11,6 +11,7 @@ struct JobResultsView: View {
     @EnvironmentObject var viewModel: SearchViewModel
     @State private var sortOrder = [KeyPathComparator(\JobPosting.matchScore, order: .reverse)]
     @State private var searchText = ""
+    @State private var showingBreakdownFor: UUID? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -60,16 +61,35 @@ struct JobResultsView: View {
             // Table
             Table(filteredJobs, selection: $viewModel.selectedJobID, sortOrder: $sortOrder) {
                 TableColumn("Match", value: \.matchScore) { job in
-                    HStack {
+                    HStack(spacing: 4) {
                         Circle()
                             .fill(matchScoreColor(job.matchScore))
                             .frame(width: 8, height: 8)
                         Text(job.matchScoreFormatted)
                             .font(.system(.body, design: .monospaced))
                             .fontWeight(.medium)
+
+                        Button {
+                            if showingBreakdownFor == job.id {
+                                showingBreakdownFor = nil
+                            } else {
+                                showingBreakdownFor = job.id
+                            }
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: Binding(
+                            get: { showingBreakdownFor == job.id },
+                            set: { if !$0 { showingBreakdownFor = nil } }
+                        )) {
+                            MatchBreakdownView(job: job)
+                        }
                     }
                 }
-                .width(min: 70, max: 90)
+                .width(min: 90, max: 120)
 
                 TableColumn("Title", value: \.title) { job in
                     VStack(alignment: .leading, spacing: 2) {
@@ -236,6 +256,11 @@ struct JobResultsView: View {
                     postedDate: Date().addingTimeInterval(-86400),
                     isRemote: false,
                     matchScore: 0.92,
+                    skillsScore: 0.95,
+                    keywordsScore: 0.90,
+                    experienceScore: 0.85,
+                    locationScore: 1.0,
+                    titleScore: 1.0,
                     techStack: ["Swift", "SwiftUI", "UIKit"]
                 ),
                 JobPosting(
@@ -248,10 +273,142 @@ struct JobResultsView: View {
                     postedDate: Date().addingTimeInterval(-172800),
                     isRemote: true,
                     matchScore: 0.85,
+                    skillsScore: 0.80,
+                    keywordsScore: 0.85,
+                    experienceScore: 0.90,
+                    locationScore: 1.0,
+                    titleScore: 0.5,
                     techStack: ["Swift", "Objective-C"]
                 )
             ]
             return vm
         }())
         .frame(minWidth: 800, minHeight: 600)
+}
+
+// MARK: - Match Breakdown Popover View
+struct MatchBreakdownView: View {
+    let job: JobPosting
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Match Score Breakdown")
+                .font(.headline)
+                .padding(.bottom, 4)
+
+            // Overall score
+            HStack {
+                Text("Overall Match")
+                    .fontWeight(.semibold)
+                Spacer()
+                Text(job.matchScoreFormatted)
+                    .font(.system(.body, design: .monospaced))
+                    .fontWeight(.bold)
+                    .foregroundColor(scoreColor(job.matchScore))
+            }
+
+            Divider()
+
+            // Individual factors
+            BreakdownRow(
+                label: "Skills",
+                score: job.skillsScore,
+                weight: 0.40,
+                icon: "hammer"
+            )
+
+            BreakdownRow(
+                label: "Keywords",
+                score: job.keywordsScore,
+                weight: 0.30,
+                icon: "text.magnifyingglass"
+            )
+
+            BreakdownRow(
+                label: "Experience",
+                score: job.experienceScore,
+                weight: 0.15,
+                icon: "briefcase"
+            )
+
+            BreakdownRow(
+                label: "Location",
+                score: job.locationScore,
+                weight: 0.10,
+                icon: "location"
+            )
+
+            BreakdownRow(
+                label: "Title",
+                score: job.titleScore,
+                weight: 0.05,
+                icon: "textformat"
+            )
+
+            Divider()
+
+            // Legend
+            Text("Score = weighted average of all factors")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .frame(width: 280)
+    }
+
+    private func scoreColor(_ score: Double) -> Color {
+        if score >= 0.8 { return .green }
+        else if score >= 0.6 { return .orange }
+        else { return .red }
+    }
+}
+
+struct BreakdownRow: View {
+    let label: String
+    let score: Double
+    let weight: Double
+    let icon: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .frame(width: 16)
+                .foregroundColor(.secondary)
+
+            Text(label)
+                .frame(width: 80, alignment: .leading)
+
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 8)
+                        .cornerRadius(4)
+
+                    Rectangle()
+                        .fill(barColor)
+                        .frame(width: geometry.size.width * score, height: 8)
+                        .cornerRadius(4)
+                }
+            }
+            .frame(height: 8)
+
+            Text(String(format: "%.0f%%", score * 100))
+                .font(.system(.caption, design: .monospaced))
+                .frame(width: 35, alignment: .trailing)
+
+            Text(String(format: "(%.0f%%)", weight * 100))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .frame(width: 35, alignment: .trailing)
+        }
+    }
+
+    private var barColor: Color {
+        if score >= 0.8 { return .green }
+        else if score >= 0.6 { return .orange }
+        else if score >= 0.4 { return .yellow }
+        else { return .red }
+    }
 }

@@ -17,7 +17,7 @@ from scrapers.indeed_scraper import IndeedScraper
 from scrapers.greenhouse_scraper import GreenhouseScraper
 from scrapers.workday_scraper import WorkdayScraper
 from scrapers.japandev_scraper import JapanDevScraper
-from scrapers.matcher import calculate_match_score
+from scrapers.matcher import calculate_match_score, calculate_match_breakdown
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -85,11 +85,12 @@ def search_all_boards(resume_data: Dict, filters: Dict) -> Dict:
 
                 completed_scrapers += 1
 
-    # Calculate match scores
+    # Calculate match scores with breakdown
     log_progress("Calculating match scores...", 0.85)
     for job in all_jobs:
-        score = calculate_match_score(resume_data, job)
-        job['matchScore'] = score
+        breakdown = calculate_match_breakdown(resume_data, job)
+        job['matchScore'] = breakdown['totalScore']
+        job['matchBreakdown'] = breakdown
 
     # Deduplicate jobs (same URL or title+company)
     log_progress("Deduplicating results...", 0.90)

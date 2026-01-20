@@ -23,6 +23,13 @@ final class JobPosting {
     var matchScore: Double
     var scrapedDate: Date
 
+    // Match score breakdown
+    var skillsScore: Double = 0.0
+    var keywordsScore: Double = 0.0
+    var experienceScore: Double = 0.0
+    var locationScore: Double = 0.0
+    var titleScore: Double = 0.0
+
     // Developer-specific fields
     var techStack: [String] = []
     var salaryRange: String?
@@ -51,6 +58,11 @@ final class JobPosting {
         isRemote: Bool = false,
         offersRelocation: Bool = false,
         matchScore: Double = 0.0,
+        skillsScore: Double = 0.0,
+        keywordsScore: Double = 0.0,
+        experienceScore: Double = 0.0,
+        locationScore: Double = 0.0,
+        titleScore: Double = 0.0,
         techStack: [String] = [],
         salaryRange: String? = nil,
         offersVisaSponsorship: Bool? = nil,
@@ -68,6 +80,11 @@ final class JobPosting {
         self.isRemote = isRemote
         self.offersRelocation = offersRelocation
         self.matchScore = matchScore
+        self.skillsScore = skillsScore
+        self.keywordsScore = keywordsScore
+        self.experienceScore = experienceScore
+        self.locationScore = locationScore
+        self.titleScore = titleScore
         self.scrapedDate = Date()
         self.techStack = techStack
         self.salaryRange = salaryRange

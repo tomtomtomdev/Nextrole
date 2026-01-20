@@ -68,6 +68,9 @@ class JobSearchService {
             let dateFormatter = ISO8601DateFormatter()
             let postedDate = dateFormatter.date(from: jobResult.postedDate) ?? Date()
 
+            // Extract breakdown scores
+            let breakdown = jobResult.matchBreakdown
+
             let posting = JobPosting(
                 title: jobResult.title,
                 company: jobResult.company,
@@ -79,6 +82,11 @@ class JobSearchService {
                 isRemote: jobResult.isRemote,
                 offersRelocation: jobResult.offersRelocation,
                 matchScore: jobResult.matchScore,
+                skillsScore: breakdown?.skillsScore ?? 0.0,
+                keywordsScore: breakdown?.keywordsScore ?? 0.0,
+                experienceScore: breakdown?.experienceScore ?? 0.0,
+                locationScore: breakdown?.locationScore ?? 0.0,
+                titleScore: breakdown?.titleScore ?? 0.0,
                 techStack: jobResult.techStack ?? [],
                 salaryRange: jobResult.salaryRange,
                 offersVisaSponsorship: jobResult.visaSponsorship,

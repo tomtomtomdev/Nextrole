@@ -91,6 +91,20 @@ class PythonBridge {
         let maxResults: Int
     }
 
+    struct MatchBreakdown: Codable {
+        let totalScore: Double
+        let skillsScore: Double
+        let skillsWeight: Double
+        let keywordsScore: Double
+        let keywordsWeight: Double
+        let experienceScore: Double
+        let experienceWeight: Double
+        let locationScore: Double
+        let locationWeight: Double
+        let titleScore: Double
+        let titleWeight: Double
+    }
+
     struct JobResult: Codable {
         let title: String
         let company: String
@@ -102,6 +116,7 @@ class PythonBridge {
         let isRemote: Bool
         let offersRelocation: Bool
         let matchScore: Double
+        let matchBreakdown: MatchBreakdown?
         let techStack: [String]?
         let salaryRange: String?
         let visaSponsorship: Bool?
